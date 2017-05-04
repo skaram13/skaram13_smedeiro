@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin=""/>
+ <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
+   integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+   crossorigin=""></script>
+<script type="text/javascript" src="Leaflet.Coordinates/dist/Leaflet.Coordinates-0.1.5.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<link rel="stylesheet" href="Leaflet.Coordinates/dist/Leaflet.Coordinates-0.1.5.css"/>
+<title>Optimizing Bus Stops</title>
+
+</head>
+
+<div id="mapid""></div>
+<script>
+	var mymap = L.map('mapid').setView([42.3601, -71.0589], 13);
+
+// https://www.mapbox.com/studio/styles/mapbox/streets-v10/share/
+// get token and code from that link
+
+	L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic21lZGVpcm8iLCJhIjoiY2oxdG1icTU3MDBsNjJxbW44dWY4cnMxcyJ9.wmpK7KrgWg0X9gX7kgD_UA', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		id: 'busesAndStops'
+	}).addTo(mymap);
+	L.control.coordinates().addTo(mymap);
+	// L.marker([42, -71]).addTo(mymap);
+	$(document).ready(function(){
+	    $("#btn").click(function(){
+			var address = document.getElementById("adr").value.replace(/ /g,"+");
+			var city = document.getElementById("city").value.replace(/ /g,"+");
+
+			var apiURL = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address +',+' + city +',+MA&key=AIzaSyAc9tB-lJk6H6yxswjGHwuWOvZuCDMHTRU'
+			console.log(address);
+			console.log(city);
+			console.log(apiURL)
+	        $.ajax({
+	        	type:'get',
+	        	url: apiURL,
+	        	success : function(data){
+	      //   		for (i = 0; i < data.results.length; i++) {
+	  				// 	console.log(data.results[i].geometry);
+	  				// }
+	  				var lat = data.results[0].geometry.location.lat;
+	  				var lng = data.results[0].geometry.location.lng;
+	  				console.log(data.results[0].geometry.location.lat);
+	  				console.log(data.results[0].geometry.location.lng);
+	  				L.marker([lat,lng]).addTo(mymap);
+
+
+	        	}
+	        });
+	    });
+	});
+
+	var ws = new WebSocket("ws://localhost:8080/"),
+                messages = document.createElement('ul');
+            ws.onmessage = function (event) {
+                var messages = document.getElementsByTagName('ul')[0],
+                    message = document.createElement('li'),
+                    content = document.createTextNode(event.data);
+                message.appendChild(content);
+                messages.appendChild(message);
+            };
+            document.body.appendChild(messages);
+</script>
+<form>
+Your Address:<br>
+  <input type="text" name="Address" id = "adr" value="10 Buick Street"><br>
+  <input type="text" name="City" id="city" value="Boston"><br>
+  <input type="button" name="Search"><br>
+</form>
+<select>
+  <option value="volvo">Volvo</option>
+  <option value="saab">Saab</option>
+  <option value="vw">VW</option>
+  <option value="audi" selected>Audi</option>
+</select>
+
+  <!-- <button id ="btn" type="button">Search</button> -->
+
+<body>
+ <div id="mapid"></div>
+</body>
+</html>
