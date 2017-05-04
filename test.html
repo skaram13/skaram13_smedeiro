@@ -1,0 +1,16 @@
+<script>
+  function postSomething() {
+    var http = new XMLHttpRequest();
+    var url = "http://localhost:5000/app/api/v0.1/users";
+    var json = JSON.stringify({'name':'carl'});
+    http.open("POST", url, true);
+    http.setRequestHeader("Content-type", "application/json");
+    http.onreadystatechange = function() {
+      if (http.readyState == 4 && http.status == 200) {
+        console.log(http.responseText);
+      }
+    }
+    http.send(json);
+  }
+</script>
+<button onclick="postSomething();">Post new user</button>
