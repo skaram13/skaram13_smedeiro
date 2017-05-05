@@ -169,10 +169,10 @@ class studentsGraph(dml.Algorithm):
 		else:
 			newStop = studentsGraph.findNewStops(schoolInput, dictOfCenters, dictOfSchoolStops, studentsByBusStop, latInput, lonInput, newStudentStop)
 			newStops.append(newStop)
-
-		print(newStudentStop)
 		
 		studentsGraph.storeNewStops(newStops)	
+
+		return newStudentStop
 
 
 	@staticmethod
@@ -219,8 +219,8 @@ class studentsGraph(dml.Algorithm):
 #test!
 
 
-studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
-   
+newStop = studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+print("NEW STOP:", newStop)   
 
 doc = studentsGraph.provenance()
 print(doc.get_provn())

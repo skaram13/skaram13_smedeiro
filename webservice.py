@@ -59,6 +59,12 @@ def create_student():
             print('Request not valid JSON.')
             abort(400)
         try:
+
+            #TODO - these two files/functions
+            #findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
+            #studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+
+
             # print ('hi')
             # jsonschema.validate(request.json, schema)
             # user = { 'id': users[-1]['id'] + 1, 'username': request.json['username'] }
