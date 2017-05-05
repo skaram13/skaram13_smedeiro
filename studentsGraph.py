@@ -29,6 +29,8 @@ class studentsGraph(dml.Algorithm):
 	reads = ['skaram13_smedeiro.potential_stops']
 	writes = ['skaram13_smedeiro.new_stops']
 
+	
+
 
 	def storeNewStops(data):
 		startTime = datetime.datetime.now()
@@ -52,7 +54,7 @@ class studentsGraph(dml.Algorithm):
 		endTime = datetime.datetime.now()
 		return {"start":startTime, "end":endTime}
 
-	def findNewStops(school,dictOfCenters,dictOfSchoolStops, studentsByBusStop):
+	def findNewStops(school,dictOfCenters,dictOfSchoolStops, studentsByBusStop, latInput=0, lonInput=0, newStudentStop=[]):
 		with open('input_data/boston_massachusetts_osm_line.geojson', encoding="utf8") as data_file:
 			print('loading')
 			g = json.load(data_file)
@@ -87,9 +89,16 @@ class studentsGraph(dml.Algorithm):
 				 			minCoord = [latCorner,longCorner]
 				#check if every student can reach the new stop
 				for student in studentsByBusStop[str(stop)]:
+
 					sLat = (student['latitude'])
 					sLong = (student['longitude'])
 					walkDist = (student['walk'])
+
+					if latInput!= 0 and lonInput != 0:
+						if (str(sLat) == str(latInput)) and (str(sLong) == str(lonInput)):
+							print("HERE!")
+							newStudentStop.append({"lat": minCoord[0],"lon": minCoord[1]})
+
 					dist = ((vincenty((sLat,sLong),(minCoord[0],minCoord[1])).miles)) 
 					if (dist > walkDist):
 						nay += 1
@@ -103,7 +112,7 @@ class studentsGraph(dml.Algorithm):
 	
 	
 	@staticmethod
-	def execute(schoolInput = "", trial = False):
+	def execute(schoolInput = "", latInput=0, lonInput =0 ,trial = False):
 		# print (trial)
 		#results = studentsGraph.getPotentialStops()
 		client = dml.pymongo.MongoClient()
@@ -118,6 +127,7 @@ class studentsGraph(dml.Algorithm):
 		dictOfSchoolStops = {}
 		dictOfCenters = {}
 		studentsByBusStop = {}
+		newStudentStop = []
 
 		newStops = []
 
@@ -157,9 +167,10 @@ class studentsGraph(dml.Algorithm):
 				newStop = studentsGraph.findNewStops(school, dictOfCenters, dictOfSchoolStops, studentsByBusStop)
 				newStops.append(newStop)
 		else:
-			newStop = studentsGraph.findNewStops(schoolInput, dictOfCenters, dictOfSchoolStops, studentsByBusStop)
+			newStop = studentsGraph.findNewStops(schoolInput, dictOfCenters, dictOfSchoolStops, studentsByBusStop, latInput, lonInput, newStudentStop)
 			newStops.append(newStop)
 
+		print(newStudentStop)
 		
 		studentsGraph.storeNewStops(newStops)	
 
@@ -206,10 +217,13 @@ class studentsGraph(dml.Algorithm):
 
 #studentsGraph.execute()
 #test!
-studentsGraph.execute("McKinley Middle")
+
+
+studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+   
+
 doc = studentsGraph.provenance()
 print(doc.get_provn())
 			
-
 
 #McKinley Middle

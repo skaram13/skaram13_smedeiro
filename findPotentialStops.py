@@ -20,48 +20,83 @@ from sklearn.cluster import KMeans
 
 class findPotentialStops(dml.Algorithm):
 	contributor = 'skaram13_smedeiro'
-	reads = ['skaram13_smedeiro.potential_stops']
+	reads = ['skaram13_smedeiro.students', 'skaram13_smedeiro.potential_stops']
 	writes = ['skaram13_smedeiro.students', 'skaram13_smedeiro.potential_stops']
 	
-	def storePotentialStops(data):
+	def storePotentialStops(data, singleSchool=False, school = ""):
 		startTime = datetime.datetime.now()
 		client = dml.pymongo.MongoClient()
 		repo = client.repo
 		repo.authenticate('skaram13_smedeiro', 'skaram13_smedeiro')
 
-		repo.dropCollection("potential_stops")
-		repo.createCollection("potential_stops")
-		repo['skaram13_smedeiro.potential_stops'].insert_many(data)
-		repo['skaram13_smedeiro.potential_stops'].metadata({'complete':True})
+		if singleSchool == False:
+			repo.dropCollection("potential_stops")
+			repo.createCollection("potential_stops")
+			repo['skaram13_smedeiro.potential_stops'].insert_many(data)
+			repo['skaram13_smedeiro.potential_stops'].metadata({'complete':True})
 
-		# #PRINT DATA TO TEST IF INSERTED CORRECTLY
-		results = repo['skaram13_smedeiro.potential_stops'].find()
+			# #PRINT DATA TO TEST IF INSERTED CORRECTLY
+			results = repo['skaram13_smedeiro.potential_stops'].find()
+
+		else:
+			repo['skaram13_smedeiro.potential_stops'].remove({'properties': {'school': school}})
+			repo['skaram13_smedeiro.potential_stops'].insert_many(data)
+
+
+
+		#TODO -- drop single school's stops
+		#Add in new entry
 
 		repo.logout()
 		endTime = datetime.datetime.now()
 		return {"start":startTime, "end":endTime}
-	
-	@staticmethod
-	def execute(trial = False):
+
+	def addStudent(school, lon, lat):
 		startTime = datetime.datetime.now()
-		# Set up the database connection.
 		client = dml.pymongo.MongoClient()
 		repo = client.repo
 		repo.authenticate('skaram13_smedeiro', 'skaram13_smedeiro')
 
-		#get students grouped by school
-		results = repo['skaram13_smedeiro.students'].aggregate(
-			[
-     			{'$group':{'_id' : '$properties.school', 'students': { '$push': '$$ROOT' } } }
-			]
-		)
+		entry ={"type": "Feature", "properties": {
+        "school_start": "08:30:00",
+        "zip": "02127",
+        "walk": 0.5,
+        "safety": "4",
+        "number": "168",
+        "pickup": "corner",
+        "geocode": "25025060800",
+        "school": school,
+        "street": "W Ninth St",
+        "length": 1.337088313674985,
+        "grade": "2",
+        "school_address": "380 Shawmut Avenue",
+        "school_end": "15:10:00"
+        },
+        "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            lon,
+            lat
+          ],
+          [
+            "-71.07246107",
+            "42.34073755"
+          ]
+        ]
+        }}
 		
-		#init to save 
-		allEntries = []
+		print(entry)
 
-		i = 0
-		#find k means(i.e. bus stops) for each school
-		for school in results:
+
+		
+		repo['skaram13_smedeiro.students'].insert_one(entry)
+
+		repo.logout()
+		endTime = datetime.datetime.now()
+		return {"start":startTime, "end":endTime}
+
+	def getStopsForSingleSchool(school, allEntries):
 			latList = []
 			lonList = []
 			students = []
@@ -69,7 +104,6 @@ class findPotentialStops(dml.Algorithm):
 			schoolLookup = {} #to find out the max distance a student can walk
 			#find lat, lon, and walking distance for each student at this school
 			for student in school['students']:
-
 				school = student['properties']['school']
 				walk =  student['properties']['walk']
 				longitude = student['geometry']['coordinates'][0][0]
@@ -105,7 +139,7 @@ class findPotentialStops(dml.Algorithm):
 			lonUBound = lonList[-1]
 
 			#set potential number of bus_stops
-			k= len(students) // 3
+			k = len(students) // 3
 			students = np.array(students)
 			# if (len(students) < k):
 			# 	print(len(students))
@@ -141,9 +175,56 @@ class findPotentialStops(dml.Algorithm):
 					}
 				allEntries.append(entry)
 
-			#key = str(centers[i][0]) + "," + str(centers[i][1])
 
-		findPotentialStops.storePotentialStops(allEntries)
+
+	
+	@staticmethod
+	def execute(school="", lon= 0, lat=0, trial = False):
+
+		if school != "":
+			findPotentialStops.addStudent(school,lon, lat)
+
+		startTime = datetime.datetime.now()
+		# Set up the database connection.
+		client = dml.pymongo.MongoClient()
+		repo = client.repo
+		repo.authenticate('skaram13_smedeiro', 'skaram13_smedeiro')
+
+		if school == "":
+		#get students grouped by school
+			results = repo['skaram13_smedeiro.students'].aggregate(
+				[
+	     			{'$group':{'_id' : '$properties.school', 'students': { '$push': '$$ROOT' } } }
+				]
+			)
+		else:
+			results = repo['skaram13_smedeiro.students'].aggregate(
+				[
+					{'$match': { 'properties.school' : school } },
+	     			{'$group':{'_id' : '$properties.school', 'students': { '$push': '$$ROOT' } } }
+				]
+			)
+		
+		
+		#init to save 
+		allEntries = []
+
+		i = 0
+		#find k means(i.e. bus stops) for each school
+		for school in results:
+			print (school)
+			findPotentialStops.getStopsForSingleSchool(school, allEntries)
+				#key = str(centers[i][0]) + "," + str(centers[i][1])
+		
+		if school == "":
+			findPotentialStops.storePotentialStops(allEntries)
+		else:		
+			#findPotentialStops.getStopsForSingleSchool(school, allEntries)
+			singleSchool = True
+			#fix the school thing - needs to be a single entry - just get school
+			findPotentialStops.storePotentialStops(allEntries, singleSchool, school)
+
+		
 
 			
 			
@@ -188,6 +269,8 @@ class findPotentialStops(dml.Algorithm):
 				  
 		return doc
 
-findPotentialStops.execute()
+#findPotentialStops.execute()
+
+findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
 doc = findPotentialStops.provenance()
 print(doc.get_provn())

@@ -28,6 +28,8 @@ class getStudents(dml.Algorithm):
 
 		repo.dropCollection("students")
 		repo.createCollection("students")
+
+
 		repo['skaram13_smedeiro.students'].insert_many(r['features'])
 		repo['skaram13_smedeiro.students'].metadata({'complete':True})
 		# print(repo['skaram13_smedeiro.GradRates'].metadata())
