@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,6 +16,7 @@
 
 <div id="mapid""></div>
 <script>
+	var listOfSchools = ['Academy Of Pacific Rim','Adams ES','Advent School','Alighieri Elementary','Baldwin ELC','Bates ES','BCLA - Boston Comm Lead Acad','Beethoven ES','Blackstone ES','Boston Collegiate Lower','Boston Green Acad','Boston Prep','Boston Renaissance ES','Bradley ES','Bridge Boston','Bridge Boston 2-4','Brighton HS','Channing Elementary','Charlestown High School','Chittick ES','Clap ES','Codman Acad Lower','Comm Acad Sci & Health','Condon ES','Conley ES','Curley K-8','Dearborn STEM Acad','Dever Elementary','Dudley Street Neighborhood','East Boston EEC','East Boston HS','Edison K-8','Edwards Middle','Eliot K-8','Ellis ES','Ellison/Parks EES','English HS','Everett ES','Excel Acad 1 (EB)','Excel Acad 2 (EB)','Excel HS','Frederick MS','Gardner Pilot Acad','Greenwood S K-8','Grew ES','Guild ES','Hale ES','Haley K-8','Harvard/Kent ES','Haynes EEC','HENDERSON 3-12','HENDERSON K-2','Hennigan ES','HERNANDEZ K-8','Higginson K-2 (Harrishoff St)','Higginson/Lewis K-8','Holmes ES','Horace Mann','Hurley K-8','Irving MS','Jackson/Mann','Kennedy JF ES','Kennedy PJ ES','Kenny ES','Kilmer K-3','Kilmer 4-8','King K-8','Lee Acad','Lee ES','Lyndon K-8','Lyon 9-12 ','Lyon K-8','Madison Park HS','Manning ES','Mason ES','Mather ES','Mattahunt ES','McCormack MS','McKay K-8','McKinley Elementary','McKinley Middle','McKinley Prep HS','McKinley SEA','Mendell ES','Mildred Ave K-8','Mission Hill K-8','Mozart Elementary','Murphy K-8','ODonnell ES','Ohrenberger','Orchard Gardens K-8','Otis ES','Perkins ES','Perry K-8','Philbrick ES','Quincy ES','Quincy Upper School','Roosevelt K-8 (2-8)','Roosevelt K-8 (K1-1)','Roxbury Prep Dorchester Campus','Roxbury Prep Lucy Stone','Roxbury Prep Mission Hill ','Russell ES','SHAW ES','St John','Sumner ES','Taylor ES','TechBoston Academy','Timilty MS','Tobin K-8','Trotter ES','Tynan ES','Umana Acad K-8','UP ACAD - Holland ES','UP ACAD / Dorchester','UP ACAD / S BOSTON','Urban Science Academy','Warren Prescott K-8','West Roxbury Academy','West Zone ELC','Winship ES','Winthrop ES','Young Achievers','Pope JP II Col Rd','Pope JP II Lower Mills','Park Street Sch','Neighborhood House','Match Community Day','MATCH MS','KIPP Academy Boston','E BROOKE #1 (RS)','E BROOKE #2 (MT)','E BROOKE #3 (EB)','Davis Leadership Acad','Conservatory Lab Carney','Conservatory Lab Hancock','Boston Teachers Union K-8'];
 	var mymap = L.map('mapid').setView([42.3601, -71.0589], 13);
 
 // https://www.mapbox.com/studio/styles/mapbox/streets-v10/share/
@@ -32,14 +32,20 @@
 	L.control.coordinates().addTo(mymap);
 	// L.marker([42, -71]).addTo(mymap);
 	$(document).ready(function(){
+		$('#select').empty();
+		$.each(listOfSchools, function(i, p) {
+		    $('#select').append($('<option></option>').val(p).html(p));
+		});
+		// console.log($select.html());
 	    $("#btn").click(function(){
 			var address = document.getElementById("adr").value.replace(/ /g,"+");
 			var city = document.getElementById("city").value.replace(/ /g,"+");
-
+			var school = document.getElementById("select").value;
 			var apiURL = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address +',+' + city +',+MA&key=AIzaSyAc9tB-lJk6H6yxswjGHwuWOvZuCDMHTRU'
 			console.log(address);
 			console.log(city);
-			console.log(apiURL)
+			console.log(apiURL);
+			console.log(school);
 	        $.ajax({
 	        	type:'get',
 	        	url: apiURL,
@@ -57,35 +63,23 @@
 	        	}
 	        });
 	    });
+	 
 	});
-
-	var ws = new WebSocket("ws://localhost:8080/"),
-                messages = document.createElement('ul');
-            ws.onmessage = function (event) {
-                var messages = document.getElementsByTagName('ul')[0],
-                    message = document.createElement('li'),
-                    content = document.createTextNode(event.data);
-                message.appendChild(content);
-                messages.appendChild(message);
-            };
-            document.body.appendChild(messages);
 </script>
 <form>
 Your Address:<br>
   <input type="text" name="Address" id = "adr" value="10 Buick Street"><br>
   <input type="text" name="City" id="city" value="Boston"><br>
-  <input type="button" name="Search"><br>
+  <select id="select">
+  	<option value="">select</option>
+  </select>
+  <button id ="btn" type="button">Search</button>
 </form>
-<select>
-  <option value="volvo">Volvo</option>
-  <option value="saab">Saab</option>
-  <option value="vw">VW</option>
-  <option value="audi" selected>Audi</option>
-</select>
 
-  <!-- <button id ="btn" type="button">Search</button> -->
-
+<!-- <select id="down">
+    <option value="">select</option>
+</select> -->
 <body>
- <div id="mapid"></div>
+<div id="mapid"></div>
 </body>
 </html>
