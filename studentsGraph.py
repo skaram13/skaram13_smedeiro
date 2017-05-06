@@ -219,11 +219,11 @@ class studentsGraph(dml.Algorithm):
 #test!
 
 
-newStop = studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
-print("NEW STOP:", newStop)   
+#newStop = studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+#print("NEW STOP:", newStop)   
 
-doc = studentsGraph.provenance()
-print(doc.get_provn())
+#doc = studentsGraph.provenance()
+#print(doc.get_provn())
 			
 
 #McKinley Middle

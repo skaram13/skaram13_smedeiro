@@ -271,6 +271,6 @@ class findPotentialStops(dml.Algorithm):
 
 #findPotentialStops.execute()
 
-findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
-doc = findPotentialStops.provenance()
-print(doc.get_provn())
+#findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
+#doc = findPotentialStops.provenance()
+#print(doc.get_provn())
