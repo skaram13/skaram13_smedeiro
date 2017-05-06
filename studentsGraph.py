@@ -56,6 +56,7 @@ class studentsGraph(dml.Algorithm):
 
 	def findNewStops(school,dictOfCenters,dictOfSchoolStops, studentsByBusStop, latInput=0, lonInput=0, newStudentStop=[]):
 		with open('input_data/boston_massachusetts_osm_line.geojson', encoding="utf8") as data_file:
+			
 			print('loading')
 			g = json.load(data_file)
 			g = geoql.features_properties_null_remove(g)
@@ -89,14 +90,13 @@ class studentsGraph(dml.Algorithm):
 				 			minCoord = [latCorner,longCorner]
 				#check if every student can reach the new stop
 				for student in studentsByBusStop[str(stop)]:
-
 					sLat = (student['latitude'])
 					sLong = (student['longitude'])
 					walkDist = (student['walk'])
 
 					if latInput!= 0 and lonInput != 0:
 						if (str(sLat) == str(latInput)) and (str(sLong) == str(lonInput)):
-							print("HERE!")
+							print("Student:", student)
 							newStudentStop.append({"lat": minCoord[0],"lon": minCoord[1]})
 
 					dist = ((vincenty((sLat,sLong),(minCoord[0],minCoord[1])).miles)) 
@@ -113,7 +113,7 @@ class studentsGraph(dml.Algorithm):
 	
 	@staticmethod
 	def execute(schoolInput = "", latInput=0, lonInput =0 ,trial = False):
-		# print (trial)
+		
 		#results = studentsGraph.getPotentialStops()
 		client = dml.pymongo.MongoClient()
 		repo = client.repo
@@ -164,6 +164,7 @@ class studentsGraph(dml.Algorithm):
 				print(i, ' left to go!')
 				i -= 1
 
+				print ("here 2")
 				newStop = studentsGraph.findNewStops(school, dictOfCenters, dictOfSchoolStops, studentsByBusStop)
 				newStops.append(newStop)
 		else:
@@ -219,7 +220,7 @@ class studentsGraph(dml.Algorithm):
 #test!
 
 
-#newStop = studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+#newStop = studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06911,  latInput= 42.29891)
 #print("NEW STOP:", newStop)   
 
 #doc = studentsGraph.provenance()
