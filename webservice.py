@@ -3,33 +3,17 @@ from flask import Flask, jsonify, abort, make_response, request
 from flask.ext.httpauth import HTTPBasicAuth
 from flask import render_template
 from werkzeug.utils import secure_filename
+from findPotentialStops import findPotentialStops
+from studentsGraph import studentsGraph
 
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 students = [
 ]
-
-
-# schema = {
-#   "type": "object", 
-#   "properties": {"username" : {"type": "string"}},
-#   "required": ["username"]
-# }
-
-# @app.route('/client', methods=['OPTIONS'])
-# def show_api():
-#     return jsonify(schema)
-
-# @app.route('/client', methods=['GET'])
-# @auth.login_required
-# def show_client():
-#     return open('client.html','r').read()
-
-# @app.route('/app/api/v0.1/users', methods=['GET'])
-# def get_users(): # Server-side reusable name for function.
-#     print("I'm responding.")
-#     return jsonify({'users': users})
+app.config['MONGO_DBNAME'] = 'repo'
+app.config['MONGO_USERNAME'] = 'skaram13_smedeiro'
+app.config['MONGO_PASSWORD'] = 'skaram13_smedeiro'
 
 # @app.route('/app/api/v0.1/users/', methods=['GET'])
 # def get_user(user_id):
@@ -54,35 +38,34 @@ def home(name=None):
 def create_student():
     # print('here')
     # print(request.json)
-    if request.method=='Post':
-        if not request.json:
-            print('Request not valid JSON.')
-            abort(400)
-        try:
+    #TODO - these two files/functions
+    #findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
+    #studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
 
-            #TODO - these two files/functions
-            #findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
-            #studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+    if not request.json:
+        print('Request not valid JSON.')
+        abort(400)
+    try:
+        # print ('hi')
+        # jsonschema.validate(request.json, schema)
+        print(request.json['lat'])
+        print(request.json['lng'])
+        print(request.json['school'])
+        # findPotentialStops.execute(school="Everett ES", lon= -71.06918, lat= 42.29890)
+        # print
+        # studentsGraph.execute(schoolInput="Everett ES", lonInput=-71.06918,  latInput= 42.29890)
+        # findPotentialStops.execute()
+        # findPotentialStops.execute(school=request.json['school'], lon= request.json['lng'], lat= request.json['lat'])
+        # print (temp)
+        # print (studentsGraph.execute(schoolInput=request.json['school'], lonInput=request.json['lng'],  latInput= request.json['lng']))
 
+        students.append(request.json)
+        print(students)        
+        return jsonify(request.json), 201
+    except:
+        print('Request does not follow schema.')
+        abort(400)
 
-            # print ('hi')
-            # jsonschema.validate(request.json, schema)
-            # user = { 'id': users[-1]['id'] + 1, 'username': request.json['username'] }
-            students.append(request.json)
-            print(students)        
-            return jsonify(request.json), 201
-        except:
-            print('Request does not follow schema.')
-            abort(400)
-    else:
-        return ('i need these values')
-
-
-# @auth.get_password
-# def foo(username):
-#     if username == 'alice':
-#         return 'ecila'
-#     return None
 
 @auth.error_handler
 def unauthorized():
