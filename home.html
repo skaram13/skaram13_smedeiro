@@ -3,6 +3,7 @@
 <head>
 
 <link rel="stylesheet" href="static/styles.css">
+<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin=""/>
  <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
    integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
@@ -10,17 +11,25 @@
 <script type="text/javascript" src="static/Leaflet.Coordinates/dist/Leaflet.Coordinates-0.1.5.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 <link rel="stylesheet" href="static/Leaflet.Coordinates/dist/Leaflet.Coordinates-0.1.5.css"/>
+<script src="static/L.Icon.Mapkey.js"></script>
+<link rel="stylesheet" href="static/MapkeyIcons.css" />
+<!-- <script src="Leaflet.MakiMarkers.js"></script> -->
 <title>Optimizing Bus Stops</title>
 
 </head>
 
-<div id="mapid""></div>
+<div id="mapid" style="width:100%"></div>
 <script>
 	var listOfSchools = ['Academy Of Pacific Rim','Adams ES','Advent School','Alighieri Elementary','Baldwin ELC','Bates ES','BCLA - Boston Comm Lead Acad','Beethoven ES','Blackstone ES','Boston Collegiate Lower','Boston Green Acad','Boston Prep','Boston Renaissance ES','Bradley ES','Bridge Boston','Bridge Boston 2-4','Brighton HS','Channing Elementary','Charlestown High School','Chittick ES','Clap ES','Codman Acad Lower','Comm Acad Sci & Health','Condon ES','Conley ES','Curley K-8','Dearborn STEM Acad','Dever Elementary','Dudley Street Neighborhood','East Boston EEC','East Boston HS','Edison K-8','Edwards Middle','Eliot K-8','Ellis ES','Ellison/Parks EES','English HS','Everett ES','Excel Acad 1 (EB)','Excel Acad 2 (EB)','Excel HS','Frederick MS','Gardner Pilot Acad','Greenwood S K-8','Grew ES','Guild ES','Hale ES','Haley K-8','Harvard/Kent ES','Haynes EEC','HENDERSON 3-12','HENDERSON K-2','Hennigan ES','HERNANDEZ K-8','Higginson K-2 (Harrishoff St)','Higginson/Lewis K-8','Holmes ES','Horace Mann','Hurley K-8','Irving MS','Jackson/Mann','Kennedy JF ES','Kennedy PJ ES','Kenny ES','Kilmer K-3','Kilmer 4-8','King K-8','Lee Acad','Lee ES','Lyndon K-8','Lyon 9-12 ','Lyon K-8','Madison Park HS','Manning ES','Mason ES','Mather ES','Mattahunt ES','McCormack MS','McKay K-8','McKinley Elementary','McKinley Middle','McKinley Prep HS','McKinley SEA','Mendell ES','Mildred Ave K-8','Mission Hill K-8','Mozart Elementary','Murphy K-8','ODonnell ES','Ohrenberger','Orchard Gardens K-8','Otis ES','Perkins ES','Perry K-8','Philbrick ES','Quincy ES','Quincy Upper School','Roosevelt K-8 (2-8)','Roosevelt K-8 (K1-1)','Roxbury Prep Dorchester Campus','Roxbury Prep Lucy Stone','Roxbury Prep Mission Hill ','Russell ES','SHAW ES','St John','Sumner ES','Taylor ES','TechBoston Academy','Timilty MS','Tobin K-8','Trotter ES','Tynan ES','Umana Acad K-8','UP ACAD - Holland ES','UP ACAD / Dorchester','UP ACAD / S BOSTON','Urban Science Academy','Warren Prescott K-8','West Roxbury Academy','West Zone ELC','Winship ES','Winthrop ES','Young Achievers','Pope JP II Col Rd','Pope JP II Lower Mills','Park Street Sch','Neighborhood House','Match Community Day','MATCH MS','KIPP Academy Boston','E BROOKE #1 (RS)','E BROOKE #2 (MT)','E BROOKE #3 (EB)','Davis Leadership Acad','Conservatory Lab Carney','Conservatory Lab Hancock','Boston Teachers Union K-8'];
-	var mymap = L.map('mapid').setView([42.3601, -71.0589], 13);
+        
+
+
+
+	var mymap = L.map('mapid').setView([42.3601, -71.0589], 10);
 
 // https://www.mapbox.com/studio/styles/mapbox/streets-v10/share/
 // get token and code from that link
+
 
 	L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic21lZGVpcm8iLCJhIjoiY2oxdG1icTU3MDBsNjJxbW44dWY4cnMxcyJ9.wmpK7KrgWg0X9gX7kgD_UA', {
 		maxZoom: 18,
@@ -30,70 +39,43 @@
 		id: 'busesAndStops'
 	}).addTo(mymap);
 	L.control.coordinates().addTo(mymap);
-	// L.marker([42, -71]).addTo(mymap);
+
+
+	// Creating MapkeyIcon object
+	var bus = L.icon.mapkey({icon: "bus",color:'#fff',background:'#0b0bb0',size:30});
+	var home = L.icon.mapkey({icon: "home",color:'#0b0bb0',background:'#fff',size:30});
+	// // Append to marker:
+	// L.marker([42.3601, -71.0589],{icon:mki}).addTo(mymap);
+	// L.marker([43.3601, -71.0589],{icon:home}).addTo(mymap);
+// L.marker([50,14.4],{icon:mki}).addTo(map);
 	$(document).ready(function(){
 		$('#select').empty();
 		$.each(listOfSchools, function(i, p) {
 		    $('#select').append($('<option></option>').val(p).html(p));
 		});
-		// console.log($select.html());
-	    $("#btn").click(function(){
-			var address = document.getElementById("adr").value.replace(/ /g,"+");
-			var city = document.getElementById("city").value.replace(/ /g,"+");
-			var school = document.getElementById("select").value;
-			var apiURL = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address +',+' + city +',+MA&key=AIzaSyAc9tB-lJk6H6yxswjGHwuWOvZuCDMHTRU'
-			console.log(address);
-			console.log(city);
-			console.log(apiURL);
-			console.log(school);
-	        $.ajax({
-	        	type:'get',
-	        	url: apiURL,
-	        	success : function(data){
-	      //   		for (i = 0; i < data.results.length; i++) {
-	  				// 	console.log(data.results[i].geometry);
-	  				// }
-	  				
-	  				var lat = data.results[0].geometry.location.lat;
-	  				var lng = data.results[0].geometry.location.lng;
-	  				console.log(data.results[0].geometry.location.lat);
-	  				console.log(data.results[0].geometry.location.lng);
-	  				L.marker([lat,lng]).addTo(mymap);	
-					// postSomething(lat,lng,school);
-					// console.log('here');
-					var http = new XMLHttpRequest();
-				    var url = "http://localhost:5000/app/api/v0.1/users";
-				    var json = JSON.stringify({'lat':lat,'lng':lng,'school':school});
-				    postSomething(lat,lng,school);
-	        	}
-	        });
-	    });
-	 
 	});
-	function postSomething(lat,lng,school) {
-    var http = new XMLHttpRequest();
-    var url = "http://localhost:5000/app/api/v0.1/newStudent";
-    var json = JSON.stringify({'lat':lat,'lng':lng,'school':school});
-    http.open("POST", url, true);
-    http.setRequestHeader("Content-type", "application/json");
-    http.onreadystatechange = function() {
-      if (http.readyState == 4 && http.status == 200) {
-      }
-    }
-    http.send(json);
-    console.log(json)
-  }
+	// var icon = L.MakiMarkers.icon({icon: "rocket", color: "#b0b", size: "m"});
+	
+
+	L.marker([{{values[0]}},{{values[1]}}],{icon:home}).addTo(mymap);
+	L.marker([{{values[2]}},{{values[3]}}],{icon:bus}).addTo(mymap);
+
+	// L.marker([{{values[0]}},{{values[1]}}]).addTo(mymap);
+	// L.marker([{{values[2]}},{{values[3]}}]).addTo(mymap);
+
 </script>
-<form accept="utf-8" enctype="multipart/form-data">
+<form action="/home" method="post">
 Your Address:<br>
   <input type="text" name="Address" id = "adr" value="10 Buick Street"><br>
   <input type="text" name="City" id="city" value="Boston"><br>
-  <select id="select">
+  <select id="select" name="school">
   	<option value="">select</option>
   </select>
-  <button id ="btn" type="button">Search</button>
+  <input type="submit" value="Submit"></input>
+  <!-- <button id ="btn" type="button">Search</button> -->
 </form>
+<!-- {{values[3]}} -->
 <body>
-<div id="mapid"></div>
+<!-- <div id="mapid"></div> -->
 </body>
 </html>
